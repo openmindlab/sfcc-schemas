@@ -1,0 +1,32 @@
+{
+  "name": "sfcc-schemas",
+  "version": "1.1.0",
+  "description": "Salesforce Commerce Cloud import and export schemas validator",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@stash.openmindonline.it:7999/sfcc/sfcc-schemas.git"
+  },
+  "main": "sfcc-schemas.js",
+  "license": "MIT",
+  "author": {
+    "name": "Fabrizio Giustina"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "bin": {
+    "sfcc-schemas-validate": "validate.js",
+    "sfcc-schemas-xsdfy": "xsdfy.js",
+    "sfcc-schemas-metacheatsheet": "metacheatsheet.js"
+  },
+  "dependencies": {
+    "batch-promises": "0.0.3",
+    "chalk": "2.4.2",
+    "cli-progress": "2.1.1",
+    "glob": "7.1.4",
+    "glob-promise": "3.4.0",
+    "lodash": "4.17.15",
+    "xml2js-es6-promise": "1.1.1",
+    "xsd-schema-validator": "0.6.0"
+  }
+}
