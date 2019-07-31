@@ -12,6 +12,9 @@
 ```bash
 $ npm i -g sfcc-schemas
 ```
+Warning: the module makes use of [xsd-schema-validator](https://www.npmjs.com/package/xsd-schema-validator) which requires java.
+
+See the prerequisites section on https://www.npmjs.com/package/xsd-schema-validator for details.
 
 ## Requirements
 * Node >= 10

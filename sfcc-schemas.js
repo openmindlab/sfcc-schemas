@@ -7,9 +7,15 @@ const xml2js = require('xml2js-es6-promise');
 const _ = require('lodash');
 const batchPromises = require('batch-promises');
 const cliprogress = require('cli-progress');
+const readdir = require('recursive-readdir');
 
 const { log } = console;
 
+
+let options = {
+  projectpath: 'cartridges/app_project/cartridge',
+  sfrapath: 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge'
+}
 
 async function xsdfy() {
   let files = await findXmlFiles();
@@ -70,7 +76,6 @@ async function validate(failsonerror) {
         log(chalk.yellow(`No xsd found for namespace ${ns}`));
       }
     } else {
-
       results.push(await validateXml(xml, xsd));
       resolve();
     }
@@ -94,10 +99,10 @@ async function validate(failsonerror) {
     if (!result.valid) {
       log(chalk.redBright(`File ${result.xml} invalid:`));
       result.messages.forEach(i => {
-        log(chalk.redBright('● ' + i));
+        log(chalk.redBright(`● ${i}`));
       });
       if (result.messages.length == 0) {
-        log(chalk.redBright('● ' + JSON.stringify(result)));
+        log(chalk.redBright(`● ${JSON.stringify(result)}`));
       }
       log('\n');
     }
@@ -111,7 +116,7 @@ async function validate(failsonerror) {
 }
 
 async function findXmlFiles() {
-  return glob(path.join(process.cwd(), 'sites') + '/**/*.xml');
+  return glob(`${path.join(process.cwd(), 'sites')}/**/*.xml`);
 }
 
 function buildXsdMapping() {
@@ -149,7 +154,7 @@ function getSchemaLocation(xmlcontent) {
 async function validateXml(xml, xsd) {
   return new Promise((resolve) => {
     // process.stdout.write('.');
-    validator.validateXML({ file: xml }, xsd, function (err, result) {
+    validator.validateXML({ file: xml }, xsd, (err, result) => {
       if (err) {
         if (result) {
           result.messages.push(err);
@@ -187,7 +192,7 @@ async function parseMeta(source) {
 
   cleanI18n(exts);
 
-  fs.writeFileSync(path.join(process.cwd(), 'output/config/', path.basename(source) + '.json'), JSON.stringify(exts, null, 2));
+  fs.writeFileSync(path.join(process.cwd(), 'output/config/', `${path.basename(source)}.json`), JSON.stringify(exts, null, 2));
 
   return exts;
 }
@@ -229,6 +234,52 @@ function cleanI18n(obj) {
     })
 }
 
+async function listcontrollers() {
+  let projectbase = path.join(process.cwd(), options.projectpath);
+  let files = await readdir(path.join(projectbase, 'controllers'));
+  files = files.map(i => path.relative(projectbase, i));
+
+  let sfrabase = path.join(process.cwd(), options.projectpath);
+  sfrabase = path.join(process.cwd(), options.sfrapath);
+  let sfrafiles = await readdir(path.join(sfrabase, 'controllers'));
+  sfrafiles = sfrafiles.map(i => path.relative(sfrabase, i));
+
+  let controllers = files.map(i => ({
+    name: i,
+    project: true,
+    sfra: sfrafiles.includes(i)
+  }));
+  let sfracontrollers = sfrafiles.filter(i => !files.includes(i)).map(i => ({
+    name: i,
+    project: false,
+    sfra: true
+  }));
+
+  controllers = controllers.concat(sfracontrollers);
+
+
+  let templates = await readdir(path.join(projectbase, 'templates/default'));
+  templates = templates.map(i => path.relative(projectbase, i));
+
+  let sfratemplates = await readdir(path.join(sfrabase, 'templates/default'));
+  sfratemplates = sfratemplates.map(i => path.relative(sfrabase, i));
+
+  let templatesprj = templates.map(i => ({
+    name: i,
+    project: true,
+    sfra: sfratemplates.includes(i)
+  }));
+
+  let context = {
+    controllers: controllers,
+    templates: templatesprj
+  }
+
+  let output = path.join(process.cwd(), 'output/config/', 'controllers.html');
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/controllers.html`), 'utf-8'))(context));
+  log(chalk.green(`Generated documentation at ${output}`));
+}
+
 async function metacheatsheet() {
   let definitionspath = path.join(process.cwd(), 'sites/site_template/meta/custom-objecttype-definitions.xml');
   let extensionspath = path.join(process.cwd(), 'sites/site_template/meta/system-objecttype-extensions.xml');
@@ -249,6 +300,8 @@ async function metacheatsheet() {
   output = path.join(process.cwd(), 'output/config/', 'services.html');
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/services.html`), 'utf-8'))(await parseMeta(servicespath)));
   log(chalk.green(`Generated documentation at ${output}`));
+
+  listcontrollers();
 }
 
 module.exports = { validate, xsdfy, metacheatsheet };
