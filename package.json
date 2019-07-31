@@ -4,7 +4,10 @@
   "description": "Salesforce Commerce Cloud import and export schemas validator",
   "repository": {
     "type": "git",
-    "url": "ssh://git@stash.openmindonline.it:7999/sfcc/sfcc-schemas.git"
+    "url": "https://github.com/openmindlab/sfcc-schemas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openmindlab/sfcc-schemas/issues"
   },
   "main": "sfcc-schemas.js",
   "license": "MIT",
