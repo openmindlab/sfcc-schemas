@@ -1,0 +1,41 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+  "env": {
+    "browser": false
+  },
+  "plugins": ["jest"],
+  "rules": {
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2
+      }
+    ],
+    "padded-blocks": ["error", "never"],
+    "max-len": [
+      "off",
+      {
+        "code": 120,
+        "tabWidth": 2
+      }
+    ],
+    "no-var": "warn",
+    "prefer-arrow-callback": "warn",
+    "no-unused-vars": ["error", { "args": "none" }],
+    "consistent-return": "warn",
+    "no-plusplus": "off",
+    "prefer-destructuring": "off",
+    "no-use-before-define": "off",
+    "comma-dangle": "off",
+    "no-console": "off",
+    "prefer-const": "off",
+    "no-param-reassign": "off",
+    "guard-for-in": "off",
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
+    "vars-on-top": "off",
+    "object-shorthand": "off",
+    "wrap-iife": "off",
+    "func-names": "off"
+  }
+}
