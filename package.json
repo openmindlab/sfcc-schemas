@@ -2,6 +2,10 @@
   "name": "sfcc-schemas",
   "version": "1.2.0",
   "description": "Salesforce Commerce Cloud import and export schemas validator",
+  "keywords": [
+    "Salesforce Commerce Cloud",
+    "Demandware"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/openmindlab/sfcc-schemas.git"
@@ -29,6 +33,7 @@
     "glob": "7.1.4",
     "glob-promise": "3.4.0",
     "lodash": "4.17.15",
+    "moment": "2.24.0",
     "recursive-readdir": "2.2.2",
     "xml2js-es6-promise": "1.1.1",
     "xsd-schema-validator": "0.6.0"

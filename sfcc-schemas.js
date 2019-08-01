@@ -8,6 +8,7 @@ const _ = require('lodash');
 const batchPromises = require('batch-promises');
 const cliprogress = require('cli-progress');
 const readdir = require('recursive-readdir');
+const moment = require('moment');
 
 const { log } = console;
 
@@ -194,6 +195,8 @@ async function parseMeta(source) {
 
   fs.writeFileSync(path.join(process.cwd(), 'output/config/', `${path.basename(source)}.json`), JSON.stringify(exts, null, 2));
 
+  // date parsing utils
+  exts.moment = moment;
   return exts;
 }
 
@@ -280,6 +283,7 @@ async function listcontrollers() {
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
+
 async function metacheatsheet() {
   let definitionspath = path.join(process.cwd(), 'sites/site_template/meta/custom-objecttype-definitions.xml');
   let extensionspath = path.join(process.cwd(), 'sites/site_template/meta/system-objecttype-extensions.xml');
@@ -296,12 +300,18 @@ async function metacheatsheet() {
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/meta.html`), 'utf-8'))(context));
   log(chalk.green(`Generated documentation at ${output}`));
 
-  let servicespath = path.join(process.cwd(), 'sites/site_template/services.xml');
-  output = path.join(process.cwd(), 'output/config/', 'services.html');
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/services.html`), 'utf-8'))(await parseMeta(servicespath)));
-  log(chalk.green(`Generated documentation at ${output}`));
+  await buildFromXml('sites/site_template/services.xml', 'services.html');
+  await buildFromXml('sites/site_template/jobs.xml', 'jobs.html');
 
   listcontrollers();
 }
+
+async function buildFromXml(input, html) {
+  let inputpath = path.join(process.cwd(), input);
+  let output = path.join(process.cwd(), 'output/config/', html);
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(await parseMeta(inputpath)));
+  log(chalk.green(`Generated documentation at ${output}`));
+}
+
 
 module.exports = { validate, xsdfy, metacheatsheet };
