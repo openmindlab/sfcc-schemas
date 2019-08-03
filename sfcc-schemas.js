@@ -197,6 +197,8 @@ async function parseMeta(source) {
     exts = exts.metadata.customtype.map(i => cleanupEntry(i));
   }
 
+  ensureArray(exts.urlrules, 'pipelinealiases');
+
   cleanI18n(exts);
 
   fs.writeFileSync(path.join(process.cwd(), 'output/config/', `${path.basename(source)}.json`), JSON.stringify(exts, null, 2));
@@ -234,7 +236,7 @@ function cleanI18n(obj) {
     .forEach(entry => {
       let [k, v] = entry
       if (v !== null && typeof v === 'object' && !v.escape) {
-        if (v._) {
+        if (v._ && v['xml:lang'] && Object.keys(v).length === 2) {
           obj[k] = v._;
           // log(`-> replaced ${obj[k]}`);
         }
@@ -291,31 +293,59 @@ async function listcontrollers() {
 
 
 async function metacheatsheet() {
-  let definitionspath = path.join(process.cwd(), 'sites/site_template/meta/custom-objecttype-definitions.xml');
-  let extensionspath = path.join(process.cwd(), 'sites/site_template/meta/system-objecttype-extensions.xml');
-
-  let exts = await parseMeta(extensionspath);
-  let defs = await parseMeta(definitionspath);
-
-  let context = {
-    extensions: exts,
-    definitions: defs
-  };
-
-  let output = path.join(process.cwd(), 'output/config/', 'metacheatsheet.html');
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/meta.html`), 'utf-8'))(context));
-  log(chalk.green(`Generated documentation at ${output}`));
+  await buildMeta();
 
   await buildFromXml('sites/site_template/services.xml', 'services.html');
   await buildFromXml('sites/site_template/jobs.xml', 'jobs.html');
 
-  listcontrollers();
+
+  await buildFromXmlSites('url-rules.xml', 'seo.html');
+
+  await listcontrollers();
+}
+
+async function buildMeta() {
+  let definitionspath = path.join(process.cwd(), 'sites/site_template/meta/custom-objecttype-definitions.xml');
+  let extensionspath = path.join(process.cwd(), 'sites/site_template/meta/system-objecttype-extensions.xml');
+  let exts = await parseMeta(extensionspath);
+  let defs = await parseMeta(definitionspath);
+  let context = {
+    extensions: exts,
+    definitions: defs
+  };
+  let output = path.join(process.cwd(), 'output/config/', 'metacheatsheet.html');
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/meta.html`), 'utf-8'))(context));
+  log(chalk.green(`Generated documentation at ${output}`));
 }
 
 async function buildFromXml(input, html) {
   let inputpath = path.join(process.cwd(), input);
+  if (!fs.existsSync(inputpath)) {
+    return;
+  }
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(await parseMeta(inputpath)));
+  log(chalk.green(`Generated documentation at ${output}`));
+}
+
+async function buildFromXmlSites(filename, html) {
+  let files = await readdir(path.join(process.cwd(), 'sites/site_template/sites/'), [(i, stats) => !stats.isDirectory() && path.basename(i) !== "url-rules.xml"]);
+
+  if (!files || files.length === 0) {
+    return;
+  }
+
+  let context = { sites: [] };
+
+  for (let j = 0; j < files.length; j++) {
+    let single = await parseMeta(files[j]);
+    single.id = path.basename(path.dirname(files[j]));
+
+    context.sites.push(single);
+  }
+
+  let output = path.join(process.cwd(), 'output/config/', html);
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
