@@ -9,13 +9,15 @@ const batchPromises = require('batch-promises');
 const cliprogress = require('cli-progress');
 const readdir = require('recursive-readdir');
 const moment = require('moment');
+const { timeout, TimeoutError } = require('promise-timeout');
 
 const { log } = console;
 
 
 let options = {
   projectpath: 'cartridges/app_project/cartridge',
-  sfrapath: 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge'
+  sfrapath: 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge',
+  timeout: 5000
 }
 
 async function xsdfy() {
@@ -59,7 +61,7 @@ async function validate(failsonerror) {
 
   let count = 0;
 
-  await batchPromises(20, files, xml => new Promise(async (resolve, reject) => {
+  await batchPromises(30, files, xml => new Promise(async (resolve) => {
     let xmlcontent = fs.readFileSync(xml, 'UTF-8');
     let filename = path.basename(xml);
 
@@ -76,8 +78,29 @@ async function validate(failsonerror) {
       if (ns !== 'http://www.demandware.com/xml/impex/accessrole/2007-09-05') { // exclude known missing ns
         log(chalk.yellow(`No xsd found for namespace ${ns}`));
       }
+      resolve();
     } else {
-      results.push(await validateXml(xml, xsd));
+      let res = {};
+
+      try {
+        // console.log(chalk.yellow(`Applying timeout to ${xml}`));
+        res = await timeout(validateXml(xml, xsd), options.timeout);
+      }
+      catch (err) {
+        if (err instanceof TimeoutError) {
+          // console.error(`Timeout validating ${xml}`);
+          res = {
+            xml: xml,
+            valid: false,
+            processerror: 'true',
+            messages: [`Validation timeout after ${options.timeout}ms`]
+          };
+        }
+      }
+
+      //  console.log(chalk.green(`Done with ${xml}`));
+
+      results.push(res);
       resolve();
     }
   }));
@@ -93,7 +116,7 @@ async function validate(failsonerror) {
     log(chalk`Validated ${results.length} files: {green all good} 🍺\n`);
   }
   if (notvalidated > 0) {
-    log(chalk.yellow(`${notvalidated} files cannot be validated\n`));
+    log(chalk.yellow(`${notvalidated} files cannot be validated (environment problems or timeout)\n`));
   }
 
   results.forEach((result) => {
