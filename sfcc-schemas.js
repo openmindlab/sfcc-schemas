@@ -379,24 +379,27 @@ async function buildSeo() {
 
   context.sites.forEach(site => {
     let siteentrypoints = JSON.parse(JSON.stringify(mappings));
-    site.urlrules.pipelinealiases[0].pipelinealias.forEach(alias => {
-      if (siteentrypoints[alias.pipeline]) {
-        siteentrypoints[alias.pipeline].alias = alias._;
-      } else {
-        // console.log(`Not existing remapping: ${alias._}=${alias.pipeline}`);
-        siteentrypoints[alias.pipeline] = {
-          alias: alias._,
-          pipeline: alias.pipeline,
-          controller: alias.pipeline.substr(0, alias.pipeline.indexOf('-')),
-          cartridges: []
+    if (site.urlrules && site.urlrules.pipelinealiases && site.urlrules.pipelinealiases[0]) {
+      site.urlrules.pipelinealiases[0].pipelinealias.forEach(alias => {
+        if (siteentrypoints[alias.pipeline]) {
+          siteentrypoints[alias.pipeline].alias = alias._;
+        } else {
+          // console.log(`Not existing remapping: ${alias._}=${alias.pipeline}`);
+          siteentrypoints[alias.pipeline] = {
+            alias: alias._,
+            pipeline: alias.pipeline,
+            controller: alias.pipeline.substr(0, alias.pipeline.indexOf('-')),
+            cartridges: []
+          }
         }
-      }
+      });
+    }
 
-      let entrypointsarray = Object.keys(siteentrypoints).map(i => siteentrypoints[i]).sort((a, b) => a.pipeline.localeCompare(b.pipeline));
+    let entrypointsarray = Object.keys(siteentrypoints).map(i => siteentrypoints[i]).sort((a, b) => a.pipeline.localeCompare(b.pipeline));
 
-      site.entrypoints = entrypointsarray;
-    })
-  });
+    site.entrypoints = entrypointsarray;
+  })
+
 
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
