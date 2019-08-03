@@ -27,9 +27,9 @@
     "sfcc-schemas-metacheatsheet": "metacheatsheet.js"
   },
   "dependencies": {
-    "batch-promises": "0.0.3",
     "chalk": "2.4.2",
     "cli-progress": "2.1.1",
+    "es6-promise-pool": "2.5.0",
     "glob": "7.1.4",
     "glob-promise": "3.4.0",
     "lodash": "4.17.15",

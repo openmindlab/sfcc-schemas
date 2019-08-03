@@ -5,11 +5,11 @@ const chalk = require('chalk');
 const glob = require('glob-promise');
 const xml2js = require('xml2js-es6-promise');
 const _ = require('lodash');
-const batchPromises = require('batch-promises');
 const cliprogress = require('cli-progress');
 const readdir = require('recursive-readdir');
 const moment = require('moment');
 const { timeout, TimeoutError } = require('promise-timeout');
+const PromisePool = require('es6-promise-pool');
 
 const { log } = console;
 
@@ -60,50 +60,59 @@ async function validate(failsonerror) {
   progress.start(files.length, 0);
 
   let count = 0;
+  let promisecount = 0
 
-  await batchPromises(30, files, xml => new Promise(async (resolve) => {
-    let xmlcontent = fs.readFileSync(xml, 'UTF-8');
-    let filename = path.basename(xml);
+  let pool = new PromisePool(() => {
+    if (promisecount < files.length) {
+      let xml = files[promisecount];
+      promisecount++
+      return new Promise(async (resolve) => {
+        let xmlcontent = fs.readFileSync(xml, 'UTF-8');
+        let filename = path.basename(xml);
 
-    progress.update(++count);
+        progress.update(++count);
 
-    let ns = getNamespace(xmlcontent);
-    if (!ns) {
-      chalk.red(`Namespace not found for ${filename}`);
-    }
-
-    let xsd = xsdmap.get(ns);
-
-    if (!xsd) {
-      if (ns !== 'http://www.demandware.com/xml/impex/accessrole/2007-09-05') { // exclude known missing ns
-        log(chalk.yellow(`No xsd found for namespace ${ns}`));
-      }
-      resolve();
-    } else {
-      let res = {};
-
-      try {
-        // console.log(chalk.yellow(`Applying timeout to ${xml}`));
-        res = await timeout(validateXml(xml, xsd), options.timeout);
-      }
-      catch (err) {
-        if (err instanceof TimeoutError) {
-          // console.error(`Timeout validating ${xml}`);
-          res = {
-            xml: xml,
-            valid: false,
-            processerror: 'true',
-            messages: [`Validation timeout after ${options.timeout}ms`]
-          };
+        let ns = getNamespace(xmlcontent);
+        if (!ns) {
+          chalk.red(`Namespace not found for ${filename}`);
         }
-      }
 
-      //  console.log(chalk.green(`Done with ${xml}`));
+        let xsd = xsdmap.get(ns);
 
-      results.push(res);
-      resolve();
+        if (!xsd) {
+          if (ns !== 'http://www.demandware.com/xml/impex/accessrole/2007-09-05') { // exclude known missing ns
+            log(chalk.yellow(`No xsd found for namespace ${ns}`));
+          }
+          resolve();
+        } else {
+          let res = {};
+
+          try {
+            // console.log(chalk.yellow(`Applying timeout to ${xml}`));
+            res = await timeout(validateXml(xml, xsd), options.timeout);
+          }
+          catch (err) {
+            if (err instanceof TimeoutError) {
+              // console.error(`Timeout validating ${xml}`);
+              res = {
+                xml: xml,
+                valid: false,
+                processerror: 'true',
+                messages: [`Validation timeout after ${options.timeout}ms`]
+              };
+            }
+          }
+
+          //  console.log(chalk.green(`Done with ${xml}`));
+          results.push(res);
+          resolve();
+        }
+      })
     }
-  }));
+    return null;
+  }, 20);
+
+  await pool.start();
 
   progress.stop();
   let successcount = results.filter(i => i.valid).length;
