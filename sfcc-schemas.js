@@ -245,6 +245,51 @@ function cleanI18n(obj) {
     })
 }
 
+async function entrypoints() {
+  const regex = /server\.(get|post)\(['" \n]*([a-zA-Z0-9]*)['" ]*/gm;
+
+
+  let inputpath = path.join(process.cwd(), 'output/code');
+  if (!fs.existsSync(inputpath)) {
+    return;
+  }
+
+  let files = await readdir(inputpath, [(i, stats) => !stats.isDirectory() && path.basename(path.dirname(i)) !== "controllers" && path.extname(i) !== "js"]);
+
+  let mapping = {};
+  for (let j = 0; j < files.length; j++) {
+    let file = files[j];
+    let controllername = path.basename(file);
+    controllername = controllername.substr(0, controllername.lastIndexOf('.'));
+    let dirname = path.basename(path.dirname(path.dirname(path.dirname(file))));
+
+    let filecontent = fs.readFileSync(file);
+
+    let m;
+    // eslint-disable-next-line no-cond-assign
+    while ((m = regex.exec(filecontent)) !== null) {
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+      let pipeline = `${controllername}-${m[2]}`;
+      let method = _.upperCase(m[1]);
+
+      if (mapping[pipeline]) {
+        mapping[pipeline].cartridges.push(dirname);
+      } else {
+        mapping[pipeline] = {
+          pipeline: pipeline,
+          method: method,
+          controller: controllername,
+          cartridges: [dirname]
+        };
+      }
+    }
+  }
+
+  return mapping;
+}
+
 async function listcontrollers() {
   let projectbase = path.join(process.cwd(), options.projectpath);
   let files = await readdir(path.join(projectbase, 'controllers'));
@@ -298,8 +343,7 @@ async function metacheatsheet() {
   await buildFromXml('sites/site_template/services.xml', 'services.html');
   await buildFromXml('sites/site_template/jobs.xml', 'jobs.html');
 
-
-  await buildFromXmlSites('url-rules.xml', 'seo.html');
+  await buildSeo('url-rules.xml', 'seo.html');
 
   await listcontrollers();
 }
@@ -328,7 +372,38 @@ async function buildFromXml(input, html) {
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
-async function buildFromXmlSites(filename, html) {
+async function buildSeo() {
+  let html = 'seo.html';
+  let mappings = await entrypoints();
+  let context = await parseXmlSites('url-rules.xml', 'seo.html');
+
+  context.sites.forEach(site => {
+    let siteentrypoints = JSON.parse(JSON.stringify(mappings));
+    site.urlrules.pipelinealiases[0].pipelinealias.forEach(alias => {
+      if (siteentrypoints[alias.pipeline]) {
+        siteentrypoints[alias.pipeline].alias = alias._;
+      } else {
+        // console.log(`Not existing remapping: ${alias._}=${alias.pipeline}`);
+        siteentrypoints[alias.pipeline] = {
+          alias: alias._,
+          pipeline: alias.pipeline,
+          controller: alias.pipeline.substr(0, alias.pipeline.indexOf('-')),
+          cartridges: []
+        }
+      }
+
+      let entrypointsarray = Object.keys(siteentrypoints).map(i => siteentrypoints[i]).sort((a, b) => a.pipeline.localeCompare(b.pipeline));
+
+      site.entrypoints = entrypointsarray;
+    })
+  });
+
+  let output = path.join(process.cwd(), 'output/config/', html);
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
+  log(chalk.green(`Generated documentation at ${output}`));
+}
+
+async function parseXmlSites(filename, html) {
   let files = await readdir(path.join(process.cwd(), 'sites/site_template/sites/'), [(i, stats) => !stats.isDirectory() && path.basename(i) !== "url-rules.xml"]);
 
   if (!files || files.length === 0) {
@@ -343,6 +418,14 @@ async function buildFromXmlSites(filename, html) {
 
     context.sites.push(single);
   }
+
+  return context;
+}
+
+
+// eslint-disable-next-line no-unused-vars
+async function buildFromXmlSites(filename, html) {
+  let context = await parseXmlSites(filename, html);
 
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));

@@ -63,11 +63,7 @@
     </style>
   </head>
   <body>
-    <h2>URL remapping</h2>
-
-
-
-
+    <h2>Entry points and URL remapping</h2>
 
     <% _.forEach(sites, function(site) { %>
 
@@ -75,16 +71,25 @@
     <table class="relative-table" style="text-align: left;width: 100.0%;">
       <thead>
         <tr>
+          <th>Pipeline</th>
+          <th>Method</th>
           <th>Mapping</th>
-          <th>Controller path</th>
+          <th>Controller</th>
+          <th>Available in cartridges</th>
         </tr>
       </thead>
       <tbody>
-        <% _.forEach( site.urlrules.pipelinealiases[0].pipelinealias.sort((a, b) => a._.localeCompare(b._)) ,
-        function(item) { %>
+        <% _.forEach(site.entrypoints , function(item) { %>
         <tr>
-          <td>${item._}</td>
           <td>${item.pipeline}</td>
+          <td>${item.method === 'GET' ? '<code>GET</code>' : item.method}</td>
+          <td>${item.alias}</td>
+          <td>${item.controller}.js</td>
+          <td>
+            <% _.forEach(item.cartridges , function(cartridge) { %>
+            <code>${cartridge}</code><br />
+            <% }); %>
+          </td>
         </tr>
         <% }); %>
       </tbody>

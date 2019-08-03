@@ -22,7 +22,7 @@
     "no-var": "warn",
     "prefer-arrow-callback": "warn",
     "no-unused-vars": ["error", { "args": "none" }],
-    "consistent-return": "warn",
+    "consistent-return": "off",
     "no-plusplus": "off",
     "prefer-destructuring": "off",
     "no-use-before-define": "off",
