@@ -380,6 +380,8 @@ async function metacheatsheet() {
   await buildFromXml('sites/site_template/pagemetatag.xml', 'pagemetatag.html');
 
   await listcontrollers();
+
+  await buildAssetDoc();
 }
 
 async function buildMeta() {
@@ -438,6 +440,85 @@ async function buildSeo() {
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
   log(chalk.green(`Generated documentation at ${output}`));
+}
+
+async function isml() {
+  let inputpath = path.join(process.cwd(), 'cartridges/app_project/cartridge/templates/default');
+  if (!fs.existsSync(inputpath)) {
+    return;
+  }
+  let sfrapath = path.join(process.cwd(), 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge/templates/default');
+
+
+  let sfrafiles = await readdir(sfrapath);
+  let mapping = sfrafiles.filter(i => path.extname(i) === '.isml').map(i => ({
+    path: i,
+    template: path.relative(sfrapath, i),
+    type: 'sfra'
+  })
+  );
+
+  let files = await readdir(inputpath);
+  let projectmapping = files.filter(i => path.extname(i) === '.isml').map(i => ({
+    path: i,
+    template: path.relative(inputpath, i),
+    type: 'project'
+  })
+  );
+
+
+  projectmapping.forEach(i => {
+    let idx = mapping.findIndex(p => p.template === i.template);
+    if (idx) {
+      mapping.splice(idx, 1);
+    }
+  });
+
+  return mapping.concat(projectmapping).sort((a, b) => a.template.localeCompare(b.template));
+}
+
+
+async function buildAssetDoc() {
+  let html = 'assets.html';
+  let ismls = await isml();
+
+
+  const assetsregexp = /iscontentasset['" a-zA-Z0-9-/\n]* aid="([a-zA-Z0-9-_/]*)/gm;
+  const slotregexp = /isslot['" a-zA-Z0-9-/\n]* id="([a-zA-Z0-9-_/]*)/gm;
+  const includesregexp = /isinclude['" a-zA-Z0-9-/\n]* template="([a-zA-Z0-9-_/]*)/gm;
+
+  ismls.forEach(i => {
+    let filecontent = fs.readFileSync(i.path);
+
+    i.assets = regexpmatch(assetsregexp, filecontent);
+    i.slots = regexpmatch(slotregexp, filecontent);
+    i.includes = regexpmatch(includesregexp, filecontent);
+  });
+
+  ismls = ismls.filter(i => i.assets.length !== 0 || i.slots.length !== 0 || i.includes.length !== 0);
+
+
+  // log('isml:', JSON.stringify(ismls, null, 2));
+
+let contentonly = ismls.filter(i => i.assets.length !== 0 || i.slots.length !== 0);
+
+
+  let output = path.join(process.cwd(), 'output/config/', html);
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))({ templates: ismls , content: contentonly}));
+  log(chalk.green(`Generated documentation at ${output}`));
+}
+
+function regexpmatch(regex, filecontent) {
+  let matches = [];
+  let m;
+  // eslint-disable-next-line no-cond-assign
+  while ((m = regex.exec(filecontent)) !== null) {
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+    matches.push(m[1]);
+  }
+  return matches;
 }
 
 async function parseXmlSites(filename, html) {
