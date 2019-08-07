@@ -377,6 +377,8 @@ async function metacheatsheet() {
 
   await buildSeo('url-rules.xml', 'seo.html');
 
+  await buildFromXml('sites/site_template/pagemetatag.xml', 'pagemetatag.html');
+
   await listcontrollers();
 }
 
