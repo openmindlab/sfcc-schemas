@@ -46,6 +46,7 @@
             <xsd:element name="rate-limit-calls" type="xsd:int" minOccurs="0" maxOccurs="1" />
             <xsd:element name="rate-limit-millis" type="xsd:int" minOccurs="0" maxOccurs="1" />
             <xsd:element name="cb-enabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="cb-ignore-5xx" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="cb-calls" type="xsd:int" minOccurs="0" maxOccurs="1" />
             <xsd:element name="cb-millis" type="xsd:int" minOccurs="0" maxOccurs="1" />
             <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1" />

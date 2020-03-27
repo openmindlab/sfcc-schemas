@@ -722,7 +722,7 @@
     <xsd:complexType name="complexType.PriceRefinementBucket" mixed="false">
         <xsd:sequence>
             <xsd:element name="display-name" type="sharedType.LocalizedString" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element name="threshold" type="xsd:int" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="threshold" type="xsd:double" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="currency" type="simpleType.Currency" use="required" />
     </xsd:complexType>

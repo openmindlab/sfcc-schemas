@@ -122,6 +122,7 @@
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="exclusivity" type="PromotionExclusivity" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="exclusivity-group" type="Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="currency" type="simpleType.Currency" minOccurs="0" maxOccurs="1" nillable="true" />
             <xsd:element name="name" type="LocalizedString" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="callout-msg" type="LocalizedString" minOccurs="0" maxOccurs="unbounded" />
@@ -149,6 +150,8 @@
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="tags" type="Tags" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="combinable-promotions" type="CombinablePromotions" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="mutually-exclusive-promotions" type="MutuallyExclusivePromotions" minOccurs="0" maxOccurs="1" />
             <xsd:element name="custom-attributes" type="CustomAttributes" minOccurs="0" maxOccurs="1" />
             <xsd:choice minOccurs="0" maxOccurs="1">
                 <xsd:element name="product-promotion-rule" type="ProductPromotionRule" />
@@ -171,6 +174,18 @@
     <xsd:complexType name="Tags" mixed="false">
         <xsd:sequence>
             <xsd:element name="tag" type="Generic.String.4000" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="CombinablePromotions" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="combinable-promotion" type="Generic.String.256" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="MutuallyExclusivePromotions" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="mutually-exclusive-promotion" type="Generic.String.256" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 

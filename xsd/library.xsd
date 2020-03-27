@@ -101,10 +101,24 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="visibility-mode" type="complexType.LocalizedVisibilityMode" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The visibility-mode can only be set for pages.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="data" type="sharedType.LocalizedText" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The data only be set for components (see contentassetcomponentdata.json).
+                        The data can only be set for components (see contentassetcomponentdata.json).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="search-words" type="sharedType.LocalizedString" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The search-words are used for creating a search index on the content.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -354,7 +368,15 @@
     <xsd:complexType name="complexType.PageMetaTagRule" mixed="false">
         <xsd:attribute name="rule-id" type="simpleType.Generic.NonEmptyString.100" use="required" />
     </xsd:complexType>
-    
+
+    <xsd:complexType name="complexType.LocalizedVisibilityMode">
+        <xsd:simpleContent>
+            <xsd:extension base="simpleType.VisibilityMode">
+                <xsd:attribute ref="xml:lang" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
     <xsd:simpleType name="simpleType.Generic.NonEmptyString.100">
         <xsd:restriction base="simpleType.Generic.String">
             <xsd:minLength value="1" />
@@ -459,6 +481,13 @@
             <xsd:enumeration value="none" />
             <xsd:enumeration value="values" />
             <xsd:enumeration value="thresholds" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="simpleType.VisibilityMode">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="invisible" />
+            <xsd:enumeration value="visible" />
         </xsd:restriction>
     </xsd:simpleType>
 
