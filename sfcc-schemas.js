@@ -10,6 +10,7 @@ const readdir = require('recursive-readdir');
 const moment = require('moment');
 const { timeout, TimeoutError } = require('promise-timeout');
 const PromisePool = require('es6-promise-pool');
+const yargs = require('yargs')
 
 const { log } = console;
 
@@ -376,6 +377,11 @@ async function listcontrollers() {
 
 
 async function metacheatsheet() {
+  const argv = yargs.argv;
+
+  options.projectpath = argv.projectpath || options.projectpath;
+  options.sfrapath = argv.sfrapath || options.sfrapath;
+
   await buildMeta();
 
   await buildFromXml('sites/site_template/services.xml', 'services.html');
