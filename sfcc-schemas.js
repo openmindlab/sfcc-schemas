@@ -324,6 +324,12 @@ async function entrypoints() {
 
 async function listcontrollers() {
   let projectbase = path.join(process.cwd(), options.projectpath);
+
+  if (!fs.existsSync(projectbase)) {
+    log(`Skipping controller docs, folder ${projectbase} not available`);
+    return;
+  }
+
   let files = await readdir(path.join(projectbase, 'controllers'));
   files = files.map(i => path.relative(projectbase, i));
 
@@ -446,11 +452,11 @@ async function buildSeo(xml, html) {
 }
 
 async function isml() {
-  let inputpath = path.join(process.cwd(), 'cartridges/app_project/cartridge/templates/default');
+  let inputpath = path.join(process.cwd(), `${options.projectpath}/templates/default`);
   if (!fs.existsSync(inputpath)) {
     return;
   }
-  let sfrapath = path.join(process.cwd(), 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge/templates/default');
+  let sfrapath = path.join(process.cwd(), `${options.sfrapath}/templates/default`);
 
 
   let sfrafiles = await readdir(sfrapath);
@@ -485,6 +491,10 @@ async function buildAssetDoc() {
   let html = 'assets.html';
   let ismls = await isml();
 
+  if (!ismls) {
+    return;
+  }
+
 
   const assetsregexp = /iscontentasset['" a-zA-Z0-9-/\n]* aid="([a-zA-Z0-9-_/]*)/gm;
   const slotregexp = /isslot['" a-zA-Z0-9-/\n]* id="([a-zA-Z0-9-_/]*)/gm;
@@ -503,11 +513,11 @@ async function buildAssetDoc() {
 
   // log('isml:', JSON.stringify(ismls, null, 2));
 
-let contentonly = ismls.filter(i => i.assets.length !== 0 || i.slots.length !== 0);
+  let contentonly = ismls.filter(i => i.assets.length !== 0 || i.slots.length !== 0);
 
 
   let output = path.join(process.cwd(), 'output/config/', html);
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))({ templates: ismls , content: contentonly}));
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))({ templates: ismls, content: contentonly }));
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
