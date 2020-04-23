@@ -408,10 +408,13 @@ async function buildFromXml(input, html) {
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
-async function buildSeo() {
-  let html = 'seo.html';
+async function buildSeo(xml, html) {
   let mappings = await entrypoints();
-  let context = await parseXmlSites('url-rules.xml', 'seo.html');
+  let context = await parseXmlSites(xml, 'seo.html');
+
+  if (!context) {
+    return;
+  }
 
   context.sites.forEach(site => {
     let siteentrypoints = JSON.parse(JSON.stringify(mappings));
