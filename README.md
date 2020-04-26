@@ -2,6 +2,13 @@
 
 > Salesforce Commerce Cloud import and export schemas validator
 
+<div>
+	<br>
+	<a href="https://openmindonline.it" target="_blank"><img width="200" src="openmind.svg" alt="openmind"></a>
+	<br>
+	<br>
+</div>
+
 ## Features
 
 * validate salesforce commerce cloud import/export xml files
