@@ -1,0 +1,16 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2017",
+    "noImplicitAny": false,
+    "removeComments": false,
+    "declaration": true,
+    "preserveConstEnums": true,
+    "resolveJsonModule": true,
+    "esModuleInterop" : true,
+    "sourceMap": false,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

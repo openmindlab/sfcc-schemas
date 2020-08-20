@@ -267,7 +267,7 @@ function cleanI18n(obj) {
   Object
     .entries(obj)
     .forEach(entry => {
-      let [k, v] = entry
+      let [k, v]: any = entry
       if (v !== null && typeof v === 'object' && !v.escape) {
         if (v._ && v['xml:lang'] && Object.keys(v).length === 2) {
           obj[k] = v._;

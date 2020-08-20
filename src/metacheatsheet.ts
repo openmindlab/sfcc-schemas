@@ -2,5 +2,7 @@
 const sfccSchemas = require('./sfcc-schemas');
 
 (() => {
-  sfccSchemas.xsdfy();
+  sfccSchemas.metacheatsheet();
 })();
+
+export { };
