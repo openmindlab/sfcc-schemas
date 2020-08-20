@@ -1,16 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const validator = require('xsd-schema-validator');
-const chalk = require('chalk');
-const glob = require('glob-promise');
-const xml2js = require('xml2js-es6-promise');
-const _ = require('lodash');
-const cliprogress = require('cli-progress');
-const readdir = require('recursive-readdir');
-const moment = require('moment');
-const { timeout, TimeoutError } = require('promise-timeout');
-const PromisePool = require('es6-promise-pool');
-const yargs = require('yargs')
+import fs from 'fs';
+import path from 'path';
+import validator from 'xsd-schema-validator';
+import chalk from 'chalk';
+import glob from 'glob-promise';
+import xml2js from 'xml2js';
+import _ from 'lodash';
+import cliprogress from 'cli-progress';
+import readdir from 'recursive-readdir';
+import moment from 'moment';
+import { timeout, TimeoutError } from 'promise-timeout';
+import PromisePool from 'es6-promise-pool';
+import yargs from 'yargs';
 
 const { log } = console;
 
@@ -192,7 +192,7 @@ function getSchemaLocation(xmlcontent) {
 async function validateXml(xml, xsd) {
   return new Promise((resolve) => {
     // process.stdout.write('.');
-    validator.validateXML({ file: xml }, xsd, (err, result) => {
+    validator.validateXML({ file: xml }, xsd, (err, result: any) => {
       if (err) {
         if (result) {
           if (!result.messages || result.messages.length === 0) {
@@ -213,7 +213,7 @@ async function validateXml(xml, xsd) {
 
 
 async function parseMeta(source) {
-  let exts = await xml2js(fs.readFileSync(source, 'utf-8'), {
+  var parser = new xml2js.Parser({
     trim: true,
     normalizeTags: true,
     mergeAttrs: true,
@@ -221,6 +221,8 @@ async function parseMeta(source) {
     attrNameProcessors: [function (name) { return _.replace(name, /-/g, ''); }],
     tagNameProcessors: [function (name) { return _.replace(name, /-/g, ''); }]
   });
+
+  let exts = await parser.parseStringPromise(fs.readFileSync(source, 'utf-8'));
 
   if (exts.metadata && exts.metadata.typeextension) {
     ensureArray(exts.metadata, 'typeextension');
@@ -296,7 +298,7 @@ async function entrypoints() {
     controllername = controllername.substr(0, controllername.lastIndexOf('.'));
     let dirname = path.basename(path.dirname(path.dirname(path.dirname(file))));
 
-    let filecontent = fs.readFileSync(file);
+    let filecontent = fs.readFileSync(file, 'utf8');
 
     let m;
     // eslint-disable-next-line no-cond-assign
@@ -379,8 +381,8 @@ async function listcontrollers() {
 async function metacheatsheet() {
   const argv = yargs.argv;
 
-  options.projectpath = argv.projectpath || options.projectpath;
-  options.sfrapath = argv.sfrapath || options.sfrapath;
+  options.projectpath = argv.projectpath as string || options.projectpath;
+  options.sfrapath = argv.sfrapath as string || options.sfrapath;
 
   await buildMeta();
 
@@ -495,7 +497,7 @@ async function isml() {
 
 async function buildAssetDoc() {
   let html = 'assets.html';
-  let ismls = await isml();
+  let ismls: any[] = await isml();
 
   if (!ismls) {
     return;
@@ -570,4 +572,4 @@ async function buildFromXmlSites(filename, html) {
 }
 
 
-module.exports = { validate, xsdfy, metacheatsheet };
+export default { validate, xsdfy, metacheatsheet }
