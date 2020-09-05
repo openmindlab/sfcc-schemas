@@ -107,6 +107,8 @@
             <xsd:element name="archived-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="searchable-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="refinable-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="prevent-requalifying-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="prorate-across-eligible-items-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="qualifiers" type="PromotionQualifiers" minOccurs="0" maxOccurs="1" >
                 <xsd:annotation>
                     <xsd:documentation>
@@ -447,6 +449,7 @@
             </xsd:choice>
             <xsd:element name="disable-global-excluded-products" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="shipping-methods" type="PromotedShippingMethods" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="payment-methods" type="PromotedPaymentMethods" minOccurs="0" maxOccurs="1" />
             <xsd:element name="identical-products" type="xsd:boolean" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -609,6 +612,7 @@
                 <xsd:element name="qualifying-products-combination" type="ProductCombination" minOccurs="0" maxOccurs="1" />
             </xsd:choice>
             <xsd:element name="shipping-methods" type="PromotedShippingMethods" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="payment-methods" type="PromotedPaymentMethods" minOccurs="0" maxOccurs="1" />
             <xsd:element name="prohibit-nonqualifying-products" type="xsd:boolean" minOccurs="0" maxOccurs="1">
                   <xsd:annotation>
                     <xsd:documentation>

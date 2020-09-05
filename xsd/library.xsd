@@ -86,10 +86,9 @@
             <xsd:element name="type" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The type must either be a page ("page.*") or a component ("component.*") and can only be set
-                        if the experience builder feature is turned on. Those types are defined as part of the storefront
-                        cartridges, that should be assigned to the same sites to which the given library is assigned to
-                        such that definition and data match.
+                        The type must either be a page ("page.*") or a component ("component.*"). Those types are defined
+                        as part of the storefront cartridges, that should be assigned to the same sites to which the
+                        given library is assigned to such that definition and data match.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -122,6 +121,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="aspect-type" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The aspect-type is only viable for Page Designer pages.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="online-flag" type="sharedType.SiteSpecificBoolean" minOccurs="0" maxOccurs="unbounded" nillable="true" />
             <xsd:element name="searchable-flag" type="sharedType.SiteSpecificBoolean" minOccurs="0" maxOccurs="unbounded" nillable="true">
                 <xsd:annotation>
@@ -145,6 +152,14 @@
                     <xsd:documentation>
                         The content-links can only be set for pages and components. Each can have multiple outgoing
                         links. Incoming links are only allowed for components (at most one per component).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="content-object-assignments" type="complexType.Content.ContentObjectAssignments" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The content-object-assignments can only be set for pages. Each page can be assigned to multiple
+                        objects and each object can be assigned to multiple pages.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -214,6 +229,35 @@
         <xsd:attribute name="content-id" type="simpleType.Generic.NonEmptyString.256" use="required" />
         <xsd:attribute name="type" type="simpleType.Generic.NonEmptyString.256" use="required" />
     </xsd:complexType>
+
+    <!-- ContentObjectAssignment -->
+    <xsd:complexType name="complexType.Content.ContentObjectAssignments" mixed="false">
+        <xsd:annotation>
+            <xsd:documentation>
+                These links are only allowed between content elements of type page and other persistent objects. At the moment
+                only categories are supported.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="content-object-assignment" type="complexType.Content.ContentObjectAssignment" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="complexType.Content.ContentObjectAssignment" mixed="false">
+        <xsd:annotation>
+            <xsd:documentation>
+                Each object can be assigned to multiple pages (but only to one page per aspect type) and vice versa.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="object-id" type="simpleType.Generic.NonEmptyString.256" use="required" />
+        <xsd:attribute name="object-type" type="simpleType.AssignedObjectType" use="required" />
+    </xsd:complexType>
+
+    <xsd:simpleType name="simpleType.AssignedObjectType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="category" />
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <!-- Search Engine Support -->
     <xsd:complexType name="complexType.PageAttributes" mixed="false">

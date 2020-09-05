@@ -23,15 +23,20 @@
         <xsd:restriction base="xsd:string">
             <xsd:annotation>
                 <xsd:documentation>
-                The export version which was used for the export. Since 18.5. Using version 19.2 
-                leads to a check during order import that guest element exist on customer node. 
-                Specifying the guest flag brings additional safety because it reduces the 
-                likelihood that orders are attached to another customer.
+                    The export version which was used for the export. Since 18.5. Using version 19.2
+                    leads to a check during order import that guest element exist on customer node.
+                    Specifying the guest flag brings additional safety because it reduces the
+                    likelihood that orders are attached to another customer. Since version 20.6 the fields
+                    product-name (4000), suite (256) and price-book-id (256) support longer string values
+                    due to their implementation. Since version 20.8 the fields inventory-list-id and 
+                    custom-attributes of ProductShippingLineItem are exported.
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:enumeration value="18.5" />
             <xsd:enumeration value="19.2" />
             <xsd:enumeration value="19.5" />
+            <xsd:enumeration value="20.6" />
+            <xsd:enumeration value="20.8" />
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -147,7 +152,7 @@
             <xsd:element name="job-title" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="address1" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="address2" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="suite" type="simpleType.Generic.String.32" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="suite" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="postbox" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="city" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="postal-code" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
@@ -197,7 +202,7 @@
                 <xsd:sequence>
                     <xsd:element name="position" type="xsd:decimal" minOccurs="0" maxOccurs="1"></xsd:element>
                     <xsd:element name="product-id" type="simpleType.Generic.NonEmptyString.100" minOccurs="1"></xsd:element>
-                    <xsd:element name="product-name" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1"></xsd:element>
+                    <xsd:element name="product-name" type="simpleType.Generic.String.4000" minOccurs="0" maxOccurs="1"></xsd:element>
                     <xsd:element name="quantity" type="complexType.Quantity" minOccurs="1"></xsd:element>
                     <xsd:element name="tax-rate" type="xsd:double" minOccurs="1"></xsd:element>
                     <xsd:element name="min-order-quantity" type="xsd:decimal" minOccurs="0" maxOccurs="1" />
@@ -208,6 +213,7 @@
                             <xsd:documentation>Assigns the product line item to a particular shipment of this order. The shipment referenced by the id must be defined in this order, otherwise the product line item is not valid.</xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="inventory-list-id" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
                     <xsd:element name="option-lineitems" type="complexType.OptionLineItems" maxOccurs="1" minOccurs="0"></xsd:element>
                     <xsd:element name="bundled-product-lineitems" type="complexType.BundledProductLineItems" minOccurs="0" maxOccurs="1"></xsd:element>
                     <xsd:element name="shipping-lineitem" type="complexType.ProductShippingLineItem" maxOccurs="1" minOccurs="0"></xsd:element>
@@ -293,7 +299,7 @@
                 <xsd:element name="free-shipping" type="simpleType.EmptyElement" />
                 <xsd:element name="percentage" type="simpleType.Percentage" />
                 <xsd:element name="percent-off-options" type="simpleType.Percentage" />
-                <xsd:element name="price-book-id" type="simpleType.Generic.NonEmptyString.100" />
+                <xsd:element name="price-book-id" type="simpleType.Generic.NonEmptyString.256" />
                 <xsd:element name="total-fixed-price" type="xsd:decimal" />
             </xsd:choice>        
         </xsd:sequence>
@@ -474,6 +480,7 @@
                     <xsd:element name="quantity" type="complexType.Quantity" minOccurs="1"></xsd:element>
                     <xsd:element name="tax-rate" type="xsd:double" minOccurs="1"></xsd:element>
                     <xsd:element name="type" type="simpleType.ProductShippingCostType" minOccurs="1"></xsd:element>
+                    <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1"></xsd:element>
                     <xsd:element name="price-adjustments" type="complexType.PriceAdjustments" minOccurs="0" maxOccurs="1" ></xsd:element>
                 </xsd:sequence>
             </xsd:extension>
@@ -726,7 +733,7 @@
     <xsd:complexType name="complexType.BundledProductLineItem">
         <xsd:sequence>
             <xsd:element name="product-id" type="simpleType.Generic.NonEmptyString.100"></xsd:element>
-            <xsd:element name="product-name" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element name="product-name" type="simpleType.Generic.String.4000" minOccurs="0" maxOccurs="1"></xsd:element>
             <xsd:element name="quantity" type="complexType.Quantity"></xsd:element>
             <xsd:element name="bundled-product-lineitems" type="complexType.BundledProductLineItems" minOccurs="0" maxOccurs="1"></xsd:element>
             <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1"></xsd:element>

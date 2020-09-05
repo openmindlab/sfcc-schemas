@@ -197,6 +197,8 @@
             <xsd:element name="ean" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="upc" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="unit" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="unit-quantity" type="xsd:decimal" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="unit-measure" type="simpleType.Generic.String.60" minOccurs="0" maxOccurs="1" />
             <xsd:element name="min-order-quantity" type="xsd:decimal" minOccurs="0" maxOccurs="1" />
             <xsd:element name="step-quantity" type="xsd:decimal" minOccurs="0" maxOccurs="1" />
             <xsd:element name="display-name" type="sharedType.LocalizedString" minOccurs="0" maxOccurs="unbounded" />
@@ -255,6 +257,7 @@
             </xsd:element>
             <xsd:element name="template" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="tax-class-id" type="simpleType.Generic.NonEmptyString.256" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="localized-tax-class-id" type="sharedType.LocalizedString" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="brand" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="manufacturer-name" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="manufacturer-sku" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
