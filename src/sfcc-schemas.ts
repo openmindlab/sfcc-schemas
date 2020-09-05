@@ -158,7 +158,7 @@ async function findXmlFiles() {
 }
 
 function buildXsdMapping() {
-  let xsdfolder = path.join(process.cwd(), 'node_modules/sfcc-schemas/xsd/');
+  let xsdfolder = path.join(__dirname, '../xsd/');
   let xsdmap = new Map();
   fs.readdirSync(xsdfolder).forEach((file) => {
     let fullpath = path.join(xsdfolder, file);
