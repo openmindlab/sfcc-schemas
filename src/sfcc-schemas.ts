@@ -154,7 +154,8 @@ async function validate(failsonerror) {
 }
 
 async function findXmlFiles() {
-  return glob(`${path.join(process.cwd(), 'sites')}/**/*.xml`);
+  const customPath = process.argv[2] || 'sites';
+  return glob(`${path.join(process.cwd(), customPath)}/**/*.xml`);
 }
 
 function buildXsdMapping() {
