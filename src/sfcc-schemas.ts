@@ -408,7 +408,7 @@ async function buildMeta() {
     definitions: defs
   };
   let output = path.join(process.cwd(), 'output/config/', 'metacheatsheet.html');
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/meta.html`), 'utf-8'))(context));
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `../templates/meta.html`), 'utf-8'))(context));
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
@@ -418,7 +418,8 @@ async function buildFromXml(input, html) {
     return;
   }
   let output = path.join(process.cwd(), 'output/config/', html);
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(await parseMeta(inputpath)));
+  let filepath = path.resolve(__dirname, `../templates/${html}`);
+  fs.writeFileSync(output, _.template(fs.readFileSync(filepath, 'utf-8'))(await parseMeta(inputpath)));
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
@@ -455,7 +456,7 @@ async function buildSeo(xml, html) {
 
 
   let output = path.join(process.cwd(), 'output/config/', html);
-  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
+  fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `../templates/${html}`), 'utf-8'))(context));
   log(chalk.green(`Generated documentation at ${output}`));
 }
 
