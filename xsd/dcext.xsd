@@ -110,7 +110,11 @@
                     <xsd:documentation>The element 'catalog-id' is deprecated and will be removed in a future release. Use catalog-id in catalog-configuration to set the Facebook identifier of a product feed.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="pixel-id" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="pixel-id" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1">
+            	<xsd:annotation>
+                    <xsd:documentation>If the element, 'conversions-api-enabled-flag', is set to TRUE, then 'pixel-id' cannot be manually changed here as it is tied to the provided 'conversions-api-pixel-access-token'.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="product-feed-id" type="simpleType.Generic.String.256" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>The element 'product-feed-id' is deprecated and will be removed in a future release. Use product-feed-id in catalog-configuration to set the Facebook identifier of a product feed.</xsd:documentation>
@@ -121,8 +125,22 @@
                     <xsd:documentation>The element 'country-code' is deprecated and will be removed in a future release. Use country-code in catalog-configuration to set the Facebook identifier of a product feed.</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="access-token" type="simpleType.Generic.String" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="access-token" type="simpleType.Generic.String" minOccurs="0" maxOccurs="1">
+            	<xsd:annotation>
+                    <xsd:documentation>The element, 'access-token', is encrypted by the system and cannot be manually set here.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="pixel-code-injected-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="conversions-api-enabled-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" >    
+	            <xsd:annotation>
+	                    <xsd:documentation>If the element 'conversions-api-enabled-flag' is set to true, then the value of 'conversions-api-pixel-access-token' must also be set.</xsd:documentation>
+	                </xsd:annotation>  
+            </xsd:element>      	
+            <xsd:element name="conversions-api-pixel-access-token" type="simpleType.Generic.String" minOccurs="0" maxOccurs="1">
+            	<xsd:annotation>
+                    <xsd:documentation>The element, 'conversions-api-pixel-access-token', is encrypted by the system and cannot be manually set here.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="default-product-enabled-flag" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="redirect-action" type="simpleType.FacebookRedirectAction" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>

@@ -60,9 +60,33 @@
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="in-stock-datetime" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="ats" type="simpleType.InventoryAmount" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="on-order" type="xsd:decimal" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="turnover" type="simpleType.UnboundedInventoryAmount" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="ats" type="simpleType.InventoryAmount" minOccurs="0" maxOccurs="1" >
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This element is calculated as the allocation + preorderBackorderAllocation - turnover - on-order.
+                        For this reason it is read only and cannot be imported.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>                    
+            <xsd:element name="on-order" type="xsd:decimal" minOccurs="0" maxOccurs="1" >
+                <xsd:annotation>
+                    <xsd:documentation>
+                        On Order value is increased when an order is created. 
+                        It will be decreased and with that turnover will be increased when the order is exported.
+                        For this reason it is read only and cannot be imported.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element> 
+            <xsd:element name="turnover" type="simpleType.UnboundedInventoryAmount" minOccurs="0" maxOccurs="1" >
+            <xsd:annotation>
+                    <xsd:documentation>
+                        This element is calculated as the sum of all inventory transactions (decrements and increments) 
+                        that have been recorded subsequent to the allocation was reset date. 
+                        The quantity value can be negative due to higher quantity of inventory decrements than increments.
+                        For this reason it is read only and cannot be imported.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element> 
             <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="product-id" type="simpleType.Generic.NonEmptyString.100" use="required" />

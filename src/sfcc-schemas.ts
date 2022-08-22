@@ -1,15 +1,16 @@
-import fs from 'fs';
-import path from 'path';
-import validator from 'xsd-schema-validator';
-import chalk from 'chalk';
-import glob from 'glob-promise';
-import xml2js from 'xml2js';
-import _ from 'lodash';
 import cliprogress from 'cli-progress';
-import readdir from 'recursive-readdir';
-import moment from 'moment';
-import { timeout, TimeoutError } from 'promise-timeout';
+import { createColorize } from 'colorize-template';
 import PromisePool from 'es6-promise-pool';
+import fs from 'fs';
+import glob from 'glob-promise';
+import _ from 'lodash';
+import moment from 'moment';
+import path from 'path';
+import chalk from 'picocolors';
+import { timeout, TimeoutError } from 'promise-timeout';
+import readdir from 'recursive-readdir';
+import xml2js from 'xml2js';
+import validator from 'xsd-schema-validator';
 import yargs from 'yargs';
 
 const { log } = console;
@@ -27,7 +28,7 @@ async function xsdfy() {
   for (let j = 0; j < files.length; j++) {
     let xml = files[j];
     let xmllocal = path.relative(process.cwd(), xml);
-    let xmlcontent = fs.readFileSync(xml, 'UTF-8');
+    let xmlcontent = fs.readFileSync(xml, { encoding: 'utf8' });
     let ns = getNamespace(xmlcontent);
     let schemaLocation = getSchemaLocation(xmlcontent);
 
@@ -67,8 +68,8 @@ async function validate(failsonerror) {
     if (promisecount < files.length) {
       let xml = files[promisecount];
       promisecount++
-      return new Promise(async (resolve) => {
-        let xmlcontent = fs.readFileSync(xml, 'UTF-8');
+      return new Promise<void>(async (resolve) => {
+        let xmlcontent = fs.readFileSync(xml, { encoding: 'utf8' });
         let filename = path.basename(xml);
 
         progress.update(++count);
@@ -120,10 +121,11 @@ async function validate(failsonerror) {
   let errorcount = results.filter(i => !i.valid && !i.processerror).length;
   let notvalidated = results.filter(i => i.processerror).length;
 
+  let colorize = createColorize(chalk);
   if (errorcount > 0) {
-    log(chalk`Validated ${results.length} files: {green ${successcount} valid} and {red ${errorcount} with errors}\n`);
+    log(colorize`Validated ${results.length} files: {green ${successcount} valid} and {red ${errorcount} with errors}\n`);
   } else {
-    log(chalk`Validated ${results.length} files: {green all good} 🍺\n`);
+    log(colorize`Validated ${results.length} files: {green all good} 🍺\n`);
   }
   if (notvalidated > 0) {
     log(chalk.yellow(`${notvalidated} files cannot be validated (environment problems or timeout)\n`));
@@ -131,23 +133,23 @@ async function validate(failsonerror) {
 
   results.forEach((result) => {
     if (!result.valid) {
-      log(chalk.redBright(`File ${result.xml} invalid:`));
+      log(chalk.red(`File ${result.xml} invalid:`));
       result.messages.forEach(i => {
         let msg = i;
         if (msg && msg.indexOf && msg.indexOf('cvc-complex-type') > -1 && msg.indexOf(': ') > -1) {
           msg = msg.substr(msg.indexOf(': ') + 2)
         }
-        log(chalk.redBright(`● ${msg}`));
+        log(chalk.red(`● ${msg}`));
       });
       if (result.messages.length === 0) {
-        log(chalk.redBright(`● ${JSON.stringify(result)}`));
+        log(chalk.red(`● ${JSON.stringify(result)}`));
       }
       log('\n');
     }
   });
 
   if (failsonerror && errorcount > 0) {
-    log(chalk.redBright(`${errorcount} xml files failed validation\n`));
+    log(chalk.red(`${errorcount} xml files failed validation\n`));
     process.exit(2); // fail build
     throw new Error(`${errorcount} xml files failed validation`);
   }
@@ -200,7 +202,7 @@ async function validateXml(xml, xsd) {
             result.processerror = true;
           }
         } else {
-          log(chalk.red(err));
+          log(chalk.red(err.message));
           return {};
         }
       }
@@ -379,7 +381,7 @@ async function listcontrollers() {
 
 
 async function metacheatsheet() {
-  const argv = yargs.argv;
+  const argv : any = yargs.argv;
 
   options.projectpath = argv.projectpath as string || options.projectpath;
   options.sfrapath = argv.sfrapath as string || options.sfrapath;

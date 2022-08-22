@@ -67,6 +67,7 @@
             <xsd:attribute name="if" type="xsd:string" use="optional"/>
             <xsd:attribute name="type" type="MenuActionType" use="optional"/>
             <xsd:attribute name="readonlyEnabled" type="xsd:boolean" use="optional" default="false"/>
+            <xsd:attribute name="strongAuthenticationRequired" type="xsd:boolean" use="optional" default="false"/>
         </xsd:complexType>
     </xsd:element>
     <xsd:element name="dialogaction">

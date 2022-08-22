@@ -339,6 +339,7 @@
             <xsd:element name="price-condition" type="ProductSpecification.ProductPriceFilter" />
             <xsd:element name="inventory-condition" type="ProductSpecification.ProductStockFilter" />
             <xsd:element name="attribute-condition" type="ProductSpecification.ProductAttributeFilter" />
+            <xsd:element name="product-set-condition" type="ProductSpecification.ProductSetFilter" />
             <xsd:element name="pricebook-condition" type="ProductSpecification.ProductPriceBookFilter" />
             <xsd:element name="option-condition" type="ProductSpecification.ProductOptionFilter" />
         </xsd:choice>
@@ -396,8 +397,15 @@
         <xsd:sequence>
             <xsd:element name="pricebook-id" type="Generic.NonEmptyString.256" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
-     	<xsd:attribute name="operator" type="PriceBookComparator" use="optional" default="storefront price in (recursive)" />
-	 </xsd:complexType>
+        <xsd:attribute name="operator" type="PriceBookComparator" use="optional" default="storefront price in (recursive)" />
+    </xsd:complexType>
+
+    <xsd:complexType name="ProductSpecification.ProductSetFilter" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="product-set-id" type="Generic.NonEmptyString.100" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="operator" type="ProductSetComparator" use="optional" default="is equal" />
+    </xsd:complexType>
 	 
 	 <xsd:simpleType name="PriceBookComparator">
 	     <xsd:restriction base="xsd:string">
@@ -704,7 +712,7 @@
     <xsd:simpleType name="MaxBonusItems">
         <xsd:restriction base="xsd:int">
             <xsd:minInclusive value="1" />
-            <xsd:maxInclusive value="10" />
+            <xsd:maxInclusive value="50" />
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -888,7 +896,10 @@
 
     <xsd:simpleType name="CategoryIDComparator">
         <xsd:restriction base="xsd:string">
+            <!-- 'is equal' means matching category or any of its child categories -->
             <xsd:enumeration value="is equal" />
+            <!-- 'is exactly' means matching category only -->
+            <xsd:enumeration value="is exactly" />
             <xsd:enumeration value="is direct child of"/>
             <xsd:enumeration value="is child of"/>
             <xsd:enumeration value="is direct parent of"/>
@@ -924,12 +935,19 @@
             <xsd:enumeration value="greater than" />
         </xsd:restriction>
     </xsd:simpleType>
-    
+
     <xsd:simpleType name="OptionComparator">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="is equal" />
             <xsd:enumeration value="exists" />
             <xsd:enumeration value="does not exist" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ProductSetComparator">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="is equal" />
+            <xsd:enumeration value="exists" />
         </xsd:restriction>
     </xsd:simpleType>
 

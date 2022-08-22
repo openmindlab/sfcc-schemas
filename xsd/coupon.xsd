@@ -70,6 +70,16 @@
             <xsd:element name="include-vowels" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="include-dashes" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
             <xsd:element name="algorithm" type="simpleType.CouponCodeAlgorithm" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="issue-index" type="Generic.NonNegativeInt" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="seed-info" type="SeedInfo" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SeedInfo" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="seed-number" type="Generic.NonNegativeInt" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="key" type="Generic.NonEmptyString.28" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="slate" type="Generic.NonEmptyString.28" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -104,6 +114,13 @@
     </xsd:simpleType>
 
     <!--  Nonempty string with no leading or trailing whitespace -->
+    <xsd:simpleType name="Generic.NonEmptyString.28">
+        <xsd:restriction base="Generic.String">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="28"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:simpleType name="Generic.NonEmptyString.256">
         <xsd:restriction base="Generic.String">
             <xsd:minLength value="1" />

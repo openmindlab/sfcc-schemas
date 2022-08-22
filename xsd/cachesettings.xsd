@@ -49,6 +49,7 @@
         <xsd:sequence>
             <xsd:element name="name" type="Generic.NonEmptyString.28" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="pipelines" type="complexType.CachePartitionPipelines" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="replication-tasks" type="Generic.String" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
         <xsd:attribute name="partition-id" type="xsd:string" use="required"/>
     </xsd:complexType>

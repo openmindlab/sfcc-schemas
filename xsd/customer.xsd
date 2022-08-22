@@ -86,6 +86,11 @@
             <xsd:element name="last-login-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
             <xsd:element name="last-visit-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
             <xsd:element name="preferred-locale" type="simpleType.Generic.String.10" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="customer-payment-profiles" type="complexType.CustomerPaymentProfiles" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>This element is for use with Salesforce Payments to track references of customer profiles between systems.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
@@ -240,6 +245,39 @@
         <xsd:attribute name="customer-no" type="simpleType.Generic.NonEmptyString.100" />
     </xsd:complexType>
 
+    <xsd:complexType name="complexType.CustomerPaymentProfiles" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="customer-payment-profile" type="complexType.CustomerPaymentProfile" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="complexType.CustomerPaymentProfile" mixed="false">
+        <xsd:sequence>
+            <xsd:element name="creation-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+        <xsd:attribute name="account-id" type="simpleType.Generic.NonEmptyString.256" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                The ID of the payment account used to create the customer payment profile.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="account-type" type="simpleType.PaymentAccountType" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                The type of the payment account used to create the customer payment profile.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="account-customer-id" type="simpleType.Generic.String.256" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                The ID of the customer payment profile in the payment account.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
     <!-- Shared Complex Types -->
 
     <xsd:complexType name="sharedType.CustomAttributes" mixed="false">
@@ -358,6 +396,13 @@
         <xsd:restriction base="simpleType.Generic.String">
             <xsd:minLength value="0" />
             <xsd:maxLength value="32" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="simpleType.PaymentAccountType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="STRIPE_TEST" />
+            <xsd:enumeration value="STRIPE_LIVE" />
         </xsd:restriction>
     </xsd:simpleType>
 

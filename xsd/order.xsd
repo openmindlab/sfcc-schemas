@@ -29,7 +29,9 @@
                     likelihood that orders are attached to another customer. Since version 20.6 the fields
                     product-name (4000), suite (256) and price-book-id (256) support longer string values
                     due to their implementation. Since version 20.8 the fields inventory-list-id and 
-                    custom-attributes of ProductShippingLineItem are exported.
+                    custom-attributes of ProductShippingLineItem are exported. Since version 21.9 the
+                    fields account-id and account-type are exported. Since version 22.9 details to a 
+                    Salesforce Payments payment are no longer exported in a custom method element.
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:enumeration value="18.5" />
@@ -37,6 +39,9 @@
             <xsd:enumeration value="19.5" />
             <xsd:enumeration value="20.6" />
             <xsd:enumeration value="20.8" />
+            <xsd:enumeration value="21.9" />
+            <xsd:enumeration value="22.1" />
+            <xsd:enumeration value="22.9" />
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -559,6 +564,7 @@
                 <xsd:element name="gift-certificate" type="complexType.GiftCertificate" />
                 <xsd:element name="dw-apple-pay" type="complexType.DWApplePay" />
                 <xsd:element name="dw-android-pay" type="complexType.DWAndroidPay" />
+                <xsd:element name="salesforce-payments" type="complexType.SalesforcePayments" />
                 <xsd:element name="custom-method" type="complexType.CustomPaymentMethod" />
             </xsd:choice>
 
@@ -567,6 +573,22 @@
             <xsd:element name="processor-id" type="simpleType.Generic.NonEmptyString.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="transaction-id" type="simpleType.Generic.NonEmptyString.256" minOccurs="0" maxOccurs="1" />
             <xsd:element name="transaction-type" type="simpleType.Payment.TransactionType" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="account-id" type="simpleType.Generic.NonEmptyString.256" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                    Since version 21.9.
+                    The ID of the payment account used to create the payment transaction.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="account-type" type="simpleType.Generic.NonEmptyString.256" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                    Since version 21.9.
+                    The type of the payment account used to create the payment transaction.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>These are the custom attributes of the PaymentTransaction system object.</xsd:documentation>
@@ -720,6 +742,237 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="complexType.SalesforcePayments">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Payment instrument details for a payment made using Salesforce Payments.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence maxOccurs="1" minOccurs="0">
+            <xsd:choice maxOccurs="1" minOccurs="0">
+                <xsd:element name="bancontact" type="complexType.SalesforcePayments.Bancontact" />
+                <xsd:element name="card" type="complexType.SalesforcePayments.Card" />
+                <xsd:element name="ideal" type="complexType.SalesforcePayments.Ideal" />
+                <xsd:element name="sepa-debit" type="complexType.SalesforcePayments.SepaDebit" />
+                <xsd:element name="paypal" type="complexType.SalesforcePayments.PayPal" />
+                <xsd:element name="klarna" type="complexType.SalesforcePayments.Klarna" />
+                <xsd:element name="eps" type="complexType.SalesforcePayments.Eps" />
+                <xsd:element name="venmo" type="complexType.SalesforcePayments.Venmo" />
+                <xsd:element name="afterpay-clearpay" type="complexType.SalesforcePayments.AfterpayClearpay" />
+            </xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.Bancontact">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type bancontact.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="last-4" type="simpleType.Generic.String.4" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The last 4 digits of the account number.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="bank-name" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The name of the bank used for the payment.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.Card">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type card.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="brand" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The card brand, such as (but not limited to) amex, unionpay, or visa.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="last-4" type="simpleType.Generic.String.4" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The last 4 digits of the card number.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="wallet-type" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The type of wallet used to present the card, such as (but not limited to) apple-pay or google-pay.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="complexType.SalesforcePayments.Ideal">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type ideal.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="bank" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The bank used for the payment, such as (but not limited to) abn_amro or ing.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.SepaDebit">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type sepa_debit.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="last-4" type="simpleType.Generic.String.4" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The last 4 digits of the account number.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.PayPal">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type paypal.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="payer-email-address" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The payer email address of the PayPal order.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="capture-id" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>ID of the capture to the PayPal order.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.Klarna">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type klarna.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="payment-method-category" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The category of Klarna payment, such as (but not limited to) pay_later or pay_in_installments.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.Eps">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type eps.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="bank" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The bank used for the payment, such as (but not limited to) dolomitenbank or easybank_ag.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.Venmo">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type venmo.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="payer-email-address" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>The payer email address of the PayPal order used to make the Venmo payment.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="capture-id" type="simpleType.Generic.String.256" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>ID of the capture to the PayPal order used to make the Venmo payment.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+    <xsd:complexType name="complexType.SalesforcePayments.AfterpayClearpay">
+        <xsd:annotation>
+            <xsd:documentation>
+            Since version 22.9.
+            Details to a Salesforce Payments payment of type afterpay_clearpay.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="custom-attributes" type="sharedType.CustomAttributes" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>These are the custom attributes of the OrderPaymentInstrument system object.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
     <xsd:simpleType name="simpleType.AttributeType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="int"></xsd:enumeration>
@@ -808,6 +1061,13 @@
 
     <xsd:simpleType name="simpleType.Generic.String">
         <xsd:restriction base="xsd:string" />
+    </xsd:simpleType>
+
+    <xsd:simpleType name="simpleType.Generic.String.4">
+        <xsd:restriction base="simpleType.Generic.String">
+            <xsd:minLength value="0" />
+            <xsd:maxLength value="4" />
+        </xsd:restriction>
     </xsd:simpleType>
 
     <xsd:simpleType name="simpleType.Generic.String.32">

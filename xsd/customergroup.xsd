@@ -146,6 +146,7 @@
         - session.referrerHost
         - session.referrerKeywords
         - session.sourceCodeGroup
+        - session.store
         - session.authenticated
         - session.agentUserAuthenticated
         - session.currency

@@ -143,7 +143,7 @@
             <xsd:element name="folder-links" type="complexType.Content.FolderLinks" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Pages and components cannot be assigned to folders.
+                        Components cannot be assigned to folders.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -250,12 +250,21 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:attribute name="object-id" type="simpleType.Generic.NonEmptyString.256" use="required" />
+        <xsd:attribute name="lookup-mode" type="simpleType.AssignedObjectLookupMode" />
         <xsd:attribute name="object-type" type="simpleType.AssignedObjectType" use="required" />
     </xsd:complexType>
 
     <xsd:simpleType name="simpleType.AssignedObjectType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="category" />
+            <xsd:enumeration value="product" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="simpleType.AssignedObjectLookupMode">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="category-explicit" />
+            <xsd:enumeration value="category-implicit" />
         </xsd:restriction>
     </xsd:simpleType>
 

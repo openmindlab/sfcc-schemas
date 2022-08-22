@@ -2,12 +2,6 @@
 
 > Salesforce Commerce Cloud import and export schemas validator
 
-<div>
-	<br>
-	<a href="https://openmindonline.it" target="_blank"><img width="200" src="openmind.svg" alt="openmind"></a>
-	<br>
-	<br>
-</div>
 
 ## Features
 
@@ -47,7 +41,5 @@ For this purpose the module must be installed locally in your project (`npm i sf
 ```
 
 ## License
-
-Copyright (c) 2019 openmind
 
 Released under the MIT license.
