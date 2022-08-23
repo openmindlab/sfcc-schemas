@@ -50,11 +50,11 @@ async function xsdfy() {
   }
 }
 
-async function validate(failsonerror) {
+async function validate(failsonerror: boolean) {
   let files = await findXmlFiles();
   let xsdmap = buildXsdMapping();
 
-  let results = [];
+  let results: any[] = [];
 
   let message = `Validating ${files.length} xml files using sfcc schemas`;
   const progress = new cliprogress.Bar({
@@ -132,7 +132,7 @@ async function validate(failsonerror) {
   results.forEach((result) => {
     if (!result.valid) {
       log(redBright(`File ${result.xml} invalid:`));
-      result.messages.forEach(i => {
+      result.messages.forEach((i: string) => {
         let msg = i;
         if (msg && msg.indexOf && msg.indexOf('cvc-complex-type') > -1 && msg.indexOf(': ') > -1) {
           msg = msg.substr(msg.indexOf(': ') + 2)
@@ -172,7 +172,7 @@ function buildXsdMapping() {
   return xsdmap;
 }
 
-function getNamespace(xmlcontent) {
+function getNamespace(xmlcontent: string) {
   let match = xmlcontent.match(new RegExp('xmlns(?::loc)? *= *"([a-z0-9/:.-]*)"'));
   if (match) {
     return match[1];
@@ -180,7 +180,7 @@ function getNamespace(xmlcontent) {
   return null;
 }
 
-function getSchemaLocation(xmlcontent) {
+function getSchemaLocation(xmlcontent: string) {
   let match = xmlcontent.match(/xsi:schemaLocation="(.*)"/);
   // let match = xmlcontent.match(new RegExp('xsi:schemaLocation="([.|\n]*)"'));
   if (match) {
@@ -228,7 +228,7 @@ async function validateXml(xml: string, xsd: string) {
 }
 
 
-async function parseMeta(source) {
+async function parseMeta(source: string) {
   var parser = new xml2js.Parser({
     trim: true,
     normalizeTags: true,
@@ -242,10 +242,10 @@ async function parseMeta(source) {
 
   if (exts.metadata && exts.metadata.typeextension) {
     ensureArray(exts.metadata, 'typeextension');
-    exts = exts.metadata.typeextension.map(i => cleanupEntry(i)).filter(i => i.attributedefinitions);
+    exts = exts.metadata.typeextension.map((i: any) => cleanupEntry(i)).filter((i: any) => i.attributedefinitions);
   } else if (exts.metadata && exts.metadata.customtype) {
     ensureArray(exts.metadata, 'customtype');
-    exts = exts.metadata.customtype.map(i => cleanupEntry(i));
+    exts = exts.metadata.customtype.map((i: any) => cleanupEntry(i));
   }
 
   ensureArray(exts.urlrules, 'pipelinealiases');
@@ -259,13 +259,13 @@ async function parseMeta(source) {
   return exts;
 }
 
-function ensureArray(object, field) {
+function ensureArray(object: any, field: string) {
   if (object && object[field] && !object[field].length) {
     object[field] = [object[field]];
   }
 }
 
-function cleanupEntry(i) {
+function cleanupEntry(i: any) {
   let res = i;
 
   // normalize
@@ -281,7 +281,7 @@ function cleanupEntry(i) {
   return res;
 }
 
-function cleanI18n(obj) {
+function cleanI18n(obj: any) {
   Object
     .entries(obj)
     .forEach(entry => {
@@ -307,7 +307,7 @@ async function entrypoints() {
 
   let files = await readdir(inputpath, [(i, stats) => !stats.isDirectory() && path.basename(path.dirname(i)) !== "controllers" && path.extname(i) !== "js"]);
 
-  let mapping = {};
+  let mapping: any = {};
   for (let j = 0; j < files.length; j++) {
     let file = files[j];
     let controllername = path.basename(file);
@@ -428,7 +428,7 @@ async function buildMeta() {
   log(green(`Generated documentation at ${output}`));
 }
 
-async function buildFromXml(input, html) {
+async function buildFromXml(input: string, html: string) {
   let inputpath = path.join(process.cwd(), input);
   if (!fs.existsSync(inputpath)) {
     return;
@@ -439,7 +439,7 @@ async function buildFromXml(input, html) {
   log(green(`Generated documentation at ${output}`));
 }
 
-async function buildSeo(xml, html) {
+async function buildSeo(xml: string, html: string) {
   let mappings = await entrypoints();
   let context = await parseXmlSites(xml, 'seo.html');
 
@@ -447,10 +447,10 @@ async function buildSeo(xml, html) {
     return;
   }
 
-  context.sites.forEach(site => {
+  context.sites.forEach((site: any) => {
     let siteentrypoints = JSON.parse(JSON.stringify(mappings));
     if (site.urlrules && site.urlrules.pipelinealiases && site.urlrules.pipelinealiases[0]) {
-      site.urlrules.pipelinealiases[0].pipelinealias.forEach(alias => {
+      site.urlrules.pipelinealiases[0].pipelinealias.forEach((alias: any) => {
         if (siteentrypoints[alias.pipeline]) {
           siteentrypoints[alias.pipeline].alias = alias._;
         } else {
@@ -526,7 +526,7 @@ async function buildAssetDoc() {
   const includesregexp = /isinclude['" a-zA-Z0-9-/\n]* template="([a-zA-Z0-9-_/]*)/gm;
 
   ismls.forEach(i => {
-    let filecontent = fs.readFileSync(i.path);
+    let filecontent = fs.readFileSync(i.path, { encoding: 'utf8' });
 
     i.assets = regexpmatch(assetsregexp, filecontent);
     i.slots = regexpmatch(slotregexp, filecontent);
@@ -546,7 +546,7 @@ async function buildAssetDoc() {
   log(green(`Generated documentation at ${output}`));
 }
 
-function regexpmatch(regex, filecontent) {
+function regexpmatch(regex: RegExp, filecontent: string) {
   let matches = [];
   let m;
   // eslint-disable-next-line no-cond-assign
@@ -559,14 +559,14 @@ function regexpmatch(regex, filecontent) {
   return matches;
 }
 
-async function parseXmlSites(filename, html) {
+async function parseXmlSites(filename: string, html: string) {
   let files = await readdir(path.join(process.cwd(), 'sites/site_template/sites/'), [(i, stats) => !stats.isDirectory() && path.basename(i) !== "url-rules.xml"]);
 
   if (!files || files.length === 0) {
     return;
   }
 
-  let context = { sites: [] };
+  let context: any = { sites: [] };
 
   for (let j = 0; j < files.length; j++) {
     let single = await parseMeta(files[j]);
@@ -580,7 +580,7 @@ async function parseXmlSites(filename, html) {
 
 
 // eslint-disable-next-line no-unused-vars
-async function buildFromXmlSites(filename, html) {
+async function buildFromXmlSites(filename: string, html: string) {
   let context = await parseXmlSites(filename, html);
 
   let output = path.join(process.cwd(), 'output/config/', html);
