@@ -1,16 +1,17 @@
 import cliprogress from 'cli-progress';
-import { createColorize } from 'colorize-template';
+import { cyan, green, redBright, yellow } from 'colorette';
 import PromisePool from 'es6-promise-pool';
 import fs from 'fs';
 import glob from 'glob-promise';
 import _ from 'lodash';
 import moment from 'moment';
 import path from 'path';
-import chalk from 'picocolors';
 import { timeout, TimeoutError } from 'promise-timeout';
 import readdir from 'recursive-readdir';
+import {
+  validateXMLWithXSD
+} from "validate-with-xmllint";
 import xml2js from 'xml2js';
-import validator from 'xsd-schema-validator';
 import yargs from 'yargs';
 
 const { log } = console;
@@ -18,7 +19,7 @@ const { log } = console;
 
 let options = {
   projectpath: 'cartridges/app_project/cartridge',
-  sfrapath: 'exports/storefront-reference-architecture/cartridges/app_storefront_base/cartridge',
+  sfrapath: 'cartridges/app_storefront_base/cartridge',
   timeout: 5000
 }
 
@@ -33,17 +34,17 @@ async function xsdfy() {
     let schemaLocation = getSchemaLocation(xmlcontent);
 
     if (schemaLocation) {
-      log(chalk.green(`File ${xmllocal} already mapped to ${schemaLocation}`));
+      log(green(`File ${xmllocal} already mapped to ${schemaLocation}`));
     } else {
       let xsdfile = xsdmap.get(ns);
       if (xsdfile) {
         let xsdrelative = path.relative(xml, xsdfile);
-        log(chalk.yellow(`Adding xsd to ${xml} -> ${xsdrelative}`));
+        log(yellow(`Adding xsd to ${xml} -> ${xsdrelative}`));
 
         xmlcontent = xmlcontent.replace(`${ns}"`, `${ns}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="${ns} ${xsdrelative}"`);
         fs.writeFileSync(xml, xmlcontent);
       } else {
-        log(chalk.yellow(`Unmapped: ${xml}`));
+        log(yellow(`Unmapped: ${xml}`));
       }
     }
   }
@@ -57,7 +58,7 @@ async function validate(failsonerror) {
 
   let message = `Validating ${files.length} xml files using sfcc schemas`;
   const progress = new cliprogress.Bar({
-    format: `${chalk.green(message)} [${chalk.cyan('{bar}')}] {percentage}% | {value}/{total}`
+    format: `${green(message)} [${cyan('{bar}')}] {percentage}% | {value}/{total}`
   }, cliprogress.Presets.rect);
   progress.start(files.length, 0);
 
@@ -76,26 +77,24 @@ async function validate(failsonerror) {
 
         let ns = getNamespace(xmlcontent);
         if (!ns) {
-          chalk.red(`Namespace not found for ${filename}`);
+          redBright(`Namespace not found for ${filename}`);
         }
 
         let xsd = xsdmap.get(ns);
 
         if (!xsd) {
           if (ns !== 'http://www.demandware.com/xml/impex/accessrole/2007-09-05') { // exclude known missing ns
-            log(chalk.yellow(`No xsd found for namespace ${ns}`));
+            log(yellow(`No xsd found for namespace ${ns}`));
           }
           resolve();
         } else {
           let res = {};
 
           try {
-            // console.log(chalk.yellow(`Applying timeout to ${xml}`));
             res = await timeout(validateXml(xml, xsd), options.timeout);
           }
           catch (err) {
             if (err instanceof TimeoutError) {
-              // console.error(`Timeout validating ${xml}`);
               res = {
                 xml: xml,
                 valid: false,
@@ -121,35 +120,34 @@ async function validate(failsonerror) {
   let errorcount = results.filter(i => !i.valid && !i.processerror).length;
   let notvalidated = results.filter(i => i.processerror).length;
 
-  let colorize = createColorize(chalk);
   if (errorcount > 0) {
-    log(colorize`Validated ${results.length} files: {green ${successcount} valid} and {red ${errorcount} with errors}\n`);
+    log(`Validated ${results.length} files: ${green(successcount + ' valid')} and ${redBright(errorcount + ' with errors')}\n`);
   } else {
-    log(colorize`Validated ${results.length} files: {green all good} 🍺\n`);
+    log(`Validated ${results.length} files: ${green('all good')} 🍺\n`);
   }
   if (notvalidated > 0) {
-    log(chalk.yellow(`${notvalidated} files cannot be validated (environment problems or timeout)\n`));
+    log(yellow(`${notvalidated} files cannot be validated (environment problems or timeout)\n`));
   }
 
   results.forEach((result) => {
     if (!result.valid) {
-      log(chalk.red(`File ${result.xml} invalid:`));
+      log(redBright(`File ${result.xml} invalid:`));
       result.messages.forEach(i => {
         let msg = i;
         if (msg && msg.indexOf && msg.indexOf('cvc-complex-type') > -1 && msg.indexOf(': ') > -1) {
           msg = msg.substr(msg.indexOf(': ') + 2)
         }
-        log(chalk.red(`● ${msg}`));
+        log(`\n❌ ` + msg);
       });
       if (result.messages.length === 0) {
-        log(chalk.red(`● ${JSON.stringify(result)}`));
+        log(redBright(`\n${JSON.stringify(result)}`));
       }
       log('\n');
     }
   });
 
   if (failsonerror && errorcount > 0) {
-    log(chalk.red(`${errorcount} xml files failed validation\n`));
+    log(redBright(`${errorcount} xml files failed validation\n`));
     process.exit(2); // fail build
     throw new Error(`${errorcount} xml files failed validation`);
   }
@@ -168,7 +166,7 @@ function buildXsdMapping() {
     if (ns) {
       xsdmap.set(ns, fullpath);
     } else {
-      chalk.red(`Namespace not found in xsd ${fullpath}`);
+      redBright(`Namespace not found in xsd ${fullpath}`);
     }
   });
   return xsdmap;
@@ -191,26 +189,42 @@ function getSchemaLocation(xmlcontent) {
   return null;
 }
 
-async function validateXml(xml, xsd) {
+async function validateXml(xml: string, xsd: string) {
+
   return new Promise((resolve) => {
-    // process.stdout.write('.');
-    validator.validateXML({ file: xml }, xsd, (err, result: any) => {
-      if (err) {
-        if (result) {
-          if (!result.messages || result.messages.length === 0) {
-            result.messages.push(err);
-            result.processerror = true;
-          }
-        } else {
-          log(chalk.red(err.message));
-          return {};
-        }
-      }
-      result.xml = xml;
-      result.xsd = xsd;
-      resolve(result);
-    });
+
+    validateXMLWithXSD(fs.readFileSync(xml), xsd).then((res) => {
+
+      resolve({
+        xml: xml,
+        valid: true
+      });
+    })
+      .catch((err) => {
+        let result: any = {};
+        result.xml = xml;
+        result.xsd = xsd;
+
+        let filename = xml.replace('\\', '/');
+        filename = filename.substring(filename.lastIndexOf('/') + 1);
+
+        let errors = err.toString().split('\n-:')
+          .map((s: string) => s.trimEnd())
+          .filter((s: string) => !s.startsWith('Error: xmllint exited'))
+          .filter((s: string) => s != '' && s != '- fails to validate')
+          .map((s: string) => s.replace('\- fails to validate', ''))
+          .map((s: string) => s.replace(/Element '{\S*}/, 'Element \''))
+          .map((s: string) => s.replace('Schemas validity error : ', ''))
+          ;
+
+
+        result.messages = errors;
+        resolve(result);
+      });
   });
+
+
+
 }
 
 
@@ -376,12 +390,12 @@ async function listcontrollers() {
 
   let output = path.join(process.cwd(), 'output/config/', 'controllers.html');
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/controllers.html`), 'utf-8'))(context));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 
 async function metacheatsheet() {
-  const argv : any = yargs.argv;
+  const argv: any = yargs.argv;
 
   options.projectpath = argv.projectpath as string || options.projectpath;
   options.sfrapath = argv.sfrapath as string || options.sfrapath;
@@ -411,7 +425,7 @@ async function buildMeta() {
   };
   let output = path.join(process.cwd(), 'output/config/', 'metacheatsheet.html');
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `../templates/meta.html`), 'utf-8'))(context));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 async function buildFromXml(input, html) {
@@ -422,7 +436,7 @@ async function buildFromXml(input, html) {
   let output = path.join(process.cwd(), 'output/config/', html);
   let filepath = path.resolve(__dirname, `../templates/${html}`);
   fs.writeFileSync(output, _.template(fs.readFileSync(filepath, 'utf-8'))(await parseMeta(inputpath)));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 async function buildSeo(xml, html) {
@@ -459,7 +473,7 @@ async function buildSeo(xml, html) {
 
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `../templates/${html}`), 'utf-8'))(context));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 async function isml() {
@@ -529,7 +543,7 @@ async function buildAssetDoc() {
 
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))({ templates: ismls, content: contentonly }));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 function regexpmatch(regex, filecontent) {
@@ -571,7 +585,7 @@ async function buildFromXmlSites(filename, html) {
 
   let output = path.join(process.cwd(), 'output/config/', html);
   fs.writeFileSync(output, _.template(fs.readFileSync(path.resolve(__dirname, `templates/${html}`), 'utf-8'))(context));
-  log(chalk.green(`Generated documentation at ${output}`));
+  log(green(`Generated documentation at ${output}`));
 }
 
 
